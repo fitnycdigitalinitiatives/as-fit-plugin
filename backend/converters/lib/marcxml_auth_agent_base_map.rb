@@ -5,6 +5,7 @@ module MarcXMLAuthAgentBaseMap
     import_events   = opts[:import_events]
     import_subjects = opts[:import_subjects]
     import_related_agents = opts[:import_related_agents]
+    puts "test #{opts}"
 
     {
       # AGENT PERSON
@@ -107,6 +108,8 @@ module MarcXMLAuthAgentBaseMap
         "parent::record/controlfield[@tag='005']" => maintenance_history_map
       })
     end
+
+    puts "import agent debug: #{import_related_agents}"
 
     if import_subjects
       h.merge!({

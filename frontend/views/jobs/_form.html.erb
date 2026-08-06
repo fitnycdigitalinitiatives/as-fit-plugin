@@ -58,8 +58,8 @@
     <fieldset id="js-import-subjects">
         <%= form.label_and_boolean("import_subjects", {}, false, false) %>
     </fieldset>
-    <fieldset id="js-import-related_agents" style="">
-        <div class="form-group w-100 row"><label class="col-sm-2  control-label text-right" for="job_import_related_agents_" plugin="" classes="">Import and Link related Agents?</label><div class="col-sm-1 checkbox"><input id="job_import_related_agents_" type="checkbox" name="job[import_related_agents]" value="1" col_size="1" controls_class="checkbox"></div></div>
+    <fieldset id="js-import-related_agents">
+        <%= form.label_and_boolean("import_related_agents", {}, false, false) %>
     </fieldset>
     <fieldset id="js-import-repository">
         <%= form.label_and_boolean("import_repository") %>
