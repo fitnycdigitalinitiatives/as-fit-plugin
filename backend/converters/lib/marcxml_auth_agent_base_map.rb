@@ -5,7 +5,7 @@ module MarcXMLAuthAgentBaseMap
     import_events   = opts[:import_events]
     import_subjects = opts[:import_subjects]
     import_related_agents = opts[:import_related_agents]
-    puts "test #{opts}"
+    Log.debug("marcxml_auth_agent_base_map.rb options debug: " + opts.to_s)
 
     {
       # AGENT PERSON
@@ -109,8 +109,6 @@ module MarcXMLAuthAgentBaseMap
       })
     end
 
-    puts "import agent debug: #{import_related_agents}"
-
     if import_subjects
       h.merge!({
         "parent::record/datafield[@tag='374']/subfield[@code='a']" => agent_occupation_map,
@@ -121,6 +119,8 @@ module MarcXMLAuthAgentBaseMap
         "parent::record/datafield[@tag='370']/subfield[@code='f']" => other_associated_place_map
       })
     end
+
+    Log.debug("marcxml_auth_agent_base_map.rb import agent debug: " + import_related_agents.to_s)
 
     if import_related_agents
       h.merge!({
