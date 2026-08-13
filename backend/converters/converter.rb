@@ -130,7 +130,6 @@ class Converter
 
 
   def self.for(type, input_file, opts = {})
-    Log.debug("converter.rb options debug: " + opts.to_s)
     Array(@converters).each do |converter|
       converter = converter.instance_for(type, input_file)
 

@@ -29,7 +29,6 @@ class BatchImportRunner < JobRunner
     import_subjects     = @json.job["import_subjects"] == "1" ? true : false
     import_related_agents   = @json.job["import_related_agents"] == "1" ? true : false
     import_repository   = @json.job["import_repository"] == "1" ? true : false
-    Log.debug("batch_import_runner.rb options debug: " + @json.job.to_s)
 
     # Wrap the import in a transaction if the DB supports MVCC
     begin
