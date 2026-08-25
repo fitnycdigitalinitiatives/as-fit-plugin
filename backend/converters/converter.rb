@@ -1,5 +1,3 @@
-require_relative '/archivesspace/backend/app/converters/lib/parse_queue'
-
 #
 # `Converter` is an interface used to implement new importer types.  To
 # implement your own converter, create a subclass of this class and implement

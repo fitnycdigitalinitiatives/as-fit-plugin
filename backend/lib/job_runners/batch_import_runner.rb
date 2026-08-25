@@ -8,9 +8,6 @@
   end
 end
 
-require_relative '/archivesspace/backend/app/lib/streaming_import'
-require_relative '/archivesspace/backend/app/lib/ticker'
-
 class BatchImportRunner < JobRunner
 
 #   register_for_job_type('import_job', :create_permissions => :import_records,
