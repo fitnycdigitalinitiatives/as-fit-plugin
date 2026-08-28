@@ -24,8 +24,8 @@ class BatchImportRunner < JobRunner
     filenames = @json.job['filenames'] || []
     import_maint_events = @json.job["import_events"]   == "1" ? true : false
     import_subjects     = @json.job["import_subjects"] == "1" ? true : false
-    import_related_agents   = @json.job["import_related_agents"] == "1" ? true : false
-    import_repository   = @json.job["import_repository"] == "1" ? true : false
+    import_related_agents = @json.job["import_related_agents"] == "1" ? true : false
+    import_repository = @json.job["import_repository"] == "1" ? true : false
 
     # Wrap the import in a transaction if the DB supports MVCC
     begin
