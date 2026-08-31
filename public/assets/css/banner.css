@@ -6,4 +6,5 @@ body::before {
   width: 100%;
   font-weight: bold;
   padding: 1rem 2.5rem;
+  font-size: 1.25rem;
 }
