@@ -4,16 +4,17 @@ class OAIDCTermsMapper
     jsonmodel = record.jsonmodel_record
     result = Nokogiri::XML::Builder.new do |xml|
 
-      xml['oai_dcterms'].dcterms('xmlns:dcterms' => 'http://purl.org/dc/terms/',
+      xml['oai_dcterms'].dcterms('xmlns:dc' => 'http://purl.org/dc/elements/1.1/',
+                                 'xmlns:dcterms' => 'http://purl.org/dc/terms/',
                                  'xmlns:oai_dcterms' => 'http://www.openarchives.org/OAI/2.0/oai_dcterms/',
                                  'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                                  'xsi:schemaLocation' => 'http://www.openarchives.org/OAI/2.0/oai_dcterms/') do
         # Repo name -> publisher
-        xml['dcterms'].publisher (jsonmodel['repository']['_resolved']['name'])
+        xml['dc'].publisher (jsonmodel['repository']['_resolved']['name'])
 
         # Parent institution name -> publisher
         if jsonmodel['repository']['_resolved']['parent_institution_name']
-          xml['dcterms'].publisher(jsonmodel['repository']['_resolved']['parent_institution_name'])
+          xml['dc'].publisher(jsonmodel['repository']['_resolved']['parent_institution_name'])
         end
 
         # Identifier (own component ID + IDs of parents)
@@ -25,18 +26,18 @@ class OAIDCTermsMapper
                             end
 
         unless merged_identifier.empty?
-          xml['dcterms'].identifier(merged_identifier)
+          xml['dc'].identifier(merged_identifier)
         end
 
         if AppConfig[:arks_enabled] && jsonmodel['ark_name']
           ark_url = jsonmodel['ark_name']['current']
 
-          xml['dcterms'].identifier(ark_url) if ark_url
+          xml['dc'].identifier(ark_url) if ark_url
         end
 
         # And a second identifier containing the public url - if public is running
         if AppConfig[:enable_public]
-          xml['dcterms'].identifier(AppConfig[:public_proxy_url] + jsonmodel['uri'])
+          xml['dc'].identifier(AppConfig[:public_proxy_url] + jsonmodel['uri'])
         end
 
         # Creator -- agents linked with role 'creator' that don't have a relator of 'contributor' or 'publisher'
@@ -44,7 +45,7 @@ class OAIDCTermsMapper
           next unless link['_resolved']['publish']
 
           if link['role'] == 'creator' && !['ctb' , 'pbl'].include?(link['relator'])
-            xml['dcterms'].creator(link['_resolved']['title'])
+            xml['dc'].creator(link['_resolved']['title'])
           end
         end
 
@@ -53,7 +54,7 @@ class OAIDCTermsMapper
           next unless link['_resolved']['publish']
 
           if link['role'] == 'creator' && ['ctb'].include?(link['relator'])
-            xml['dcterms'].contributor(link['_resolved']['title'])
+            xml['dc'].contributor(link['_resolved']['title'])
           end
         end
 
@@ -62,12 +63,12 @@ class OAIDCTermsMapper
           next unless link['_resolved']['publish']
 
           if link['role'] == 'creator' && ['pbl'].include?(link['relator'])
-            xml['dcterms'].publisher(link['_resolved']['title'])
+            xml['dc'].publisher(link['_resolved']['title'])
           end
         end
 
         # Title -- display string
-        xml['dcterms'].title(OAIUtils.display_string(jsonmodel))
+        xml['dc'].title(OAIUtils.display_string(jsonmodel))
 
         # Finding Aid Title
         # if jsonmodel['jsonmodel_type'] == 'archival_object'
@@ -88,7 +89,7 @@ class OAIDCTermsMapper
           elsif date['label'] == 'publication'
             xml['dcterms'].issued(date_str)
           else
-            xml['dcterms'].date(date_str)
+            xml['dc'].date(date_str)
           end
         end
 
@@ -112,9 +113,9 @@ class OAIDCTermsMapper
           language_vals = lang_materials.map {|l| l['language_and_script']}.compact
           if !language_vals.empty?
             language_vals.each do |l|
-              xml['dcterms'].language(l['language'])
+              xml['dc'].language(l['language'])
               if l.include?('script')
-                xml['dcterms'].language(l['script'])
+                xml['dc'].language(l['script'])
               end
             end
           end
@@ -122,7 +123,7 @@ class OAIDCTermsMapper
           if !language_notes.empty?
             language_notes.each do |note|
               OAIUtils.extract_published_note_content(note).each do |content|
-                xml['dcterms'].language(content)
+                xml['dc'].language(content)
               end
             end
           end
@@ -137,7 +138,7 @@ class OAIDCTermsMapper
             content = content.strip
             # de-duplicate description note types
             unless content_list.include?(content)
-              xml['dcterms'].description(content)
+              xml['dc'].description(content)
               content_list << content
             end
           end
@@ -157,7 +158,7 @@ class OAIDCTermsMapper
           .select {|note| ['originalsloc', 'altformavail', 'separatedmaterial', 'relatedmaterial'].include?(note['type'])}
           .each do |note|
           OAIUtils.extract_published_note_content(note).each do |content|
-            xml['dcterms'].relation(content)
+            xml['dc'].relation(content)
           end
         end
 
@@ -184,14 +185,14 @@ class OAIDCTermsMapper
           .select {|note| ['userestrict'].include?(note['type'])}
           .each do |note|
           OAIUtils.extract_published_note_content(note).each do |content|
-            xml['dcterms'].rights(content)
+            xml['dc'].rights(content)
           end
         end
 
         # Subjects
         Array(jsonmodel['subjects']).each do |subject|
           # Just put all subjects in the subject field
-          xml['dcterms'].subject(subject['_resolved']['title'])
+          xml['dc'].subject(subject['_resolved']['title'])
         end
 
         # Subjects continued - Agents as subjects
@@ -199,7 +200,7 @@ class OAIDCTermsMapper
           next unless link['_resolved']['publish']
 
           if link['role'] == 'subject'
-            xml['dcterms'].subject(link['_resolved']['title'])
+            xml['dc'].subject(link['_resolved']['title'])
           end
         end
 
@@ -208,7 +209,7 @@ class OAIDCTermsMapper
           .select {|note| ['physfacet'].include?(note['type'])}
           .each do |note|
           OAIUtils.extract_published_note_content(note).each do |content|
-            xml['dcterms'].type(content)
+            xml['dc'].type(content)
           end
         end
 
