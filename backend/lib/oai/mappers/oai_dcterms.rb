@@ -135,14 +135,16 @@ class OAIDCTermsMapper
         # Description note types
         content_list = []
         Array(jsonmodel['notes'])
-          .select {|note| ['scopecontent', 'langmaterial', 'bioghist', 'odd', 'arrangement'].include?(note['type'])}
+          .select {|note| ['langmaterial', 'bioghist', 'scopecontent', 'odd', 'arrangement'].include?(note['type'])}
           .each do |note|
           OAIUtils.extract_published_note_content(note).each do |content|
             content = content.strip
             # de-duplicate description note types
             unless content_list.include?(content)
-              xml['dc'].description(content)
-              content_list << content
+              if content != "Published" && content != "Minimal" && content != "Shell record"
+                xml['dc'].description(content)
+                content_list << content
+              end
             end
           end
         end
