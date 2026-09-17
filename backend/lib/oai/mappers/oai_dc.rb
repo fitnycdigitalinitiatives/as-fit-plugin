@@ -120,7 +120,7 @@ class OAIDCMapper
         # Description note types
         content_list = []
         Array(jsonmodel['notes'])
-          .select {|note| ['langmaterial', 'bioghist', 'scopecontent', 'abstract', 'odd', 'arrangement'].include?(note['type'])}
+          .select {|note| ['scopecontent', 'langmaterial', 'bioghist', 'abstract', 'odd', 'arrangement'].include?(note['type'])}
           .each do |note|
           OAIUtils.extract_published_note_content(note).each do |content|
             content = content.strip
