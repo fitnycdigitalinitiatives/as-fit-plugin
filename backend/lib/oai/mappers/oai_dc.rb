@@ -1,14 +1,12 @@
-class OAIDCTermsMapper
+class OAIDCMapper
 
   def map_oai_record(record)
     jsonmodel = record.jsonmodel_record
     result = Nokogiri::XML::Builder.new do |xml|
-
-      xml['oai_dcterms'].dcterms('xmlns:dc' => 'http://purl.org/dc/elements/1.1/',
-                                 'xmlns:dcterms' => 'http://purl.org/dc/terms/',
-                                 'xmlns:oai_dcterms' => 'http://www.openarchives.org/OAI/2.0/oai_dcterms/',
-                                 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                                 'xsi:schemaLocation' => 'http://www.openarchives.org/OAI/2.0/oai_dcterms/') do
+      xml['oai_dc'].dc('xmlns:oai_dc' => 'http://www.openarchives.org/OAI/2.0/oai_dc/',
+                       'xmlns:dc' => 'http://purl.org/dc/elements/1.1/',
+                       'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                       'xsi:schemaLocation' => 'http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd') do
         # # Repo name -> publisher
         # xml['dc'].publisher (jsonmodel['repository']['_resolved']['name'])
 
@@ -70,25 +68,12 @@ class OAIDCTermsMapper
         # Title -- display string
         xml['dc'].title(OAIUtils.display_string(jsonmodel))
 
-        # Finding Aid Title
-        # if jsonmodel['jsonmodel_type'] == 'archival_object'
-        #   xml['dcterms'].alternative(OAIUtils.strip_mixed_content(jsonmodel['resource']['_resolved']['finding_aid_title']))
-        # else
-        #   xml['dcterms'].alternative(OAIUtils.strip_mixed_content(jsonmodel['finding_aid_title']))
-        # end
-
         # Dates
         Array(jsonmodel['dates']).each do |date|
-          date_str = if date['expression']
-                       date['expression']
-                     else
-                       [date['begin'], date['end']].compact.join(' -- ')
-                     end
-          if date['label'] == 'copyright'
-            xml['dcterms'].dateCopyrighted(date_str)
-          elsif date['label'] == 'publication'
-            xml['dcterms'].issued(date_str)
+          if date['expression']
+            xml['dc'].date(date['expression'])
           else
+            date_str = [date['begin'], date['end']].compact.join(" -- ")
             xml['dc'].date(date_str)
           end
         end
@@ -98,7 +83,7 @@ class OAIDCTermsMapper
           extent_str = [extent['number'] + ' ' + I18n.t('enumerations.extent_extent_type.' + extent['extent_type'], :default => extent['extent_type']), extent['container_summary']].compact.join('; ')
           # Check for placeholder
           unless extent_str == "1 placeholder"
-            xml['dcterms'].extent(extent_str)
+            xml['dc'].format(extent_str)
           end
         end
 
@@ -107,7 +92,7 @@ class OAIDCTermsMapper
           .select {|note| ['physdesc', 'dimensions'].include?(note['type'])}
           .each do |note|
           OAIUtils.extract_published_note_content(note).each do |content|
-            xml['dcterms'].extent(content)
+            xml['dc'].format(content)
           end
         end
 
@@ -135,7 +120,7 @@ class OAIDCTermsMapper
         # Description note types
         content_list = []
         Array(jsonmodel['notes'])
-          .select {|note| ['langmaterial', 'bioghist', 'scopecontent', 'odd', 'arrangement'].include?(note['type'])}
+          .select {|note| ['langmaterial', 'bioghist', 'scopecontent', 'abstract', 'odd', 'arrangement'].include?(note['type'])}
           .each do |note|
           OAIUtils.extract_published_note_content(note).each do |content|
             content = content.strip
@@ -144,15 +129,6 @@ class OAIDCTermsMapper
               xml['dc'].description(content)
               content_list << content
             end
-          end
-        end
-
-        # Abstract note types
-        Array(jsonmodel['notes'])
-          .select {|note| ['abstract'].include?(note['type'])}
-          .each do |note|
-          OAIUtils.extract_published_note_content(note).each do |content|
-            xml['dcterms'].abstract(content)
           end
         end
 
@@ -165,27 +141,9 @@ class OAIDCTermsMapper
         #   end
         # end
 
-        # Provenance note types
+        # Rights note types
         Array(jsonmodel['notes'])
-          .select {|note| ['custodhist', 'acqinfo'].include?(note['type'])}
-          .each do |note|
-          OAIUtils.extract_published_note_content(note).each do |content|
-            xml['dcterms'].provenance(content)
-          end
-        end
-
-        # Access rights
-        Array(jsonmodel['notes'])
-          .select {|note| ['accessrestrict'].include?(note['type'])}
-          .each do |note|
-          OAIUtils.extract_published_note_content(note).each do |content|
-            xml['dcterms'].accessRights(content)
-          end
-        end
-
-        # General rights
-        Array(jsonmodel['notes'])
-          .select {|note| ['userestrict'].include?(note['type'])}
+          .select {|note| ['accessrestrict', 'userestrict'].include?(note['type'])}
           .each do |note|
           OAIUtils.extract_published_note_content(note).each do |content|
             xml['dc'].rights(content)
@@ -207,6 +165,7 @@ class OAIDCTermsMapper
           end
         end
 
+
         # Physical facet note
         Array(jsonmodel['notes'])
           .select {|note| ['physfacet'].include?(note['type'])}
@@ -221,7 +180,7 @@ class OAIDCTermsMapper
           resource_id_str = (0..3).map {|i| jsonmodel['resource']['_resolved']["id_#{i}"]}.compact.join(".")
           resource_str = [jsonmodel['resource']['_resolved']['title'], resource_id_str].join(', ')
 
-          xml['dcterms'].isPartOf(resource_str)
+          xml['dc'].relation(resource_str)
         end
       end
     end

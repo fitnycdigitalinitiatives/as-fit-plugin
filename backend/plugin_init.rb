@@ -1,5 +1,6 @@
 # Require your custom files here
 require_relative 'lib/job_runners/batch_import_runner'
+require_relative 'lib/oai/mappers/oai_dc'
 require_relative 'lib/oai/mappers/oai_dcterms'
 require_relative 'converters/lib/marcxml_auth_agent_base_map.rb'
 
