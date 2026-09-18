@@ -1,3 +1,6 @@
 en:
+  resource:
+    user_defined:
+      string_1: "OCLC Number"
   import_job:
     import_related_agents: Import and Link related Agents?
