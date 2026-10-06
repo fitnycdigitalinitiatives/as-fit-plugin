@@ -40,6 +40,11 @@ class OAIDCTermsMapper
           xml['dc'].identifier(AppConfig[:public_proxy_url] + jsonmodel['uri'])
         end
 
+        # Add OCLC number as identifier
+        if jsonmodel['user_defined'] && jsonmodel['user_defined']['string_1']
+          xml['dc'].identifier(jsonmodel['user_defined']['string_1'])
+        end
+
         # Creator -- agents linked with role 'creator' that don't have a relator of 'contributor' or 'publisher'
         Array(jsonmodel['linked_agents']).each do |link|
           next unless link['_resolved']['publish']
